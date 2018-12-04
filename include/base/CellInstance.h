@@ -1,6 +1,9 @@
 #ifndef CELLINSTANCE_H
 #define CELLINSTANCE_H
 
+#include "openmc/position.h"
+#include "openmc/material.h"
+
 //! Get/set a cell's data, including data linked to its material
 class CellInstance {
 public:
@@ -10,7 +13,7 @@ public:
   //! The position should be in OpenMC's units (cm).
   //!
   //! \param position The coordinate for the desired cell
-  explicit CellInstance(Position position);
+  explicit CellInstance(openmc::Position position);
 
   //! Get this cell's material
   //! \return A pointer to the Material associated with this cell

@@ -1,5 +1,5 @@
 #include "OpenMCTimeStepper.h"
-#include "openmc.h"
+#include "openmc/capi.h"
 
 template <>
 InputParameters

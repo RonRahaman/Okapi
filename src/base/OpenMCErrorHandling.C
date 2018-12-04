@@ -1,8 +1,8 @@
 #include "OpenMCErrorHandling.h"
 #include "MooseObject.h"
 
+#include "openmc/error.h"
 // openmc include
-#include "openmc.h"
 
 /* This file contains functions for handling error codes returned from OpenMC
    routines. OpenMC sets its own error codes in 'openmc_err_msg', but we want to

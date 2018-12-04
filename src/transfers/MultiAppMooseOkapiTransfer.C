@@ -1,6 +1,5 @@
 #include "MultiAppMooseOkapiTransfer.h"
 #include "OpenMCErrorHandling.h"
-#include "openmc.h"
 #include "math.h"
 
 #include "MooseTypes.h"
@@ -14,6 +13,7 @@
 #include "libmesh/system.h"
 
 #include "xtensor/xarray.hpp"
+#include "xtensor/xbuilder.hpp"
 
 template <>
 InputParameters
@@ -43,13 +43,13 @@ validParams<MultiAppMooseOkapiTransfer>()
 
 MultiAppMooseOkapiTransfer::MultiAppMooseOkapiTransfer(const InputParameters & parameters)
   : MultiAppFXTransfer(parameters),
-    _cell(parameters.get<int32_t>("openmc_cell")),
     _tally(parameters.get<int32_t>("openmc_tally")),
     _dbg(parameters.get<bool>("dbg")),
     _store_results(parameters.get<bool>("store_results")),
     _geometry_multiplier(getParam<MooseEnum>("geometry_type") == "cylindrical" ? 2. : 1.),
     _checks_done(false),
-    _stride_integer(0)
+    _stride_integer(0),
+    _cell(parameters.get<int32_t>("openmc_cell"))
 {
 }
 
@@ -103,14 +103,13 @@ MultiAppMooseOkapiTransfer::execute()
         {
           if (_store_results)
           {
-            for (const auto& c : cells_) 
+            for (const auto& c : _cells)
             {
-              auto shell_id = cell_to_shell.at(c.material_index_);
-              auto t = _shell_temperatures.at(shell_id)
+              auto shell_id = _cell_to_shell.at(c.material_index_);
+              auto t = _shell_temperatures.at(shell_id);
               if (_dbg)
                 _console << "Setting OpenMC cell " << c << " temperature to " << t << std::endl;
-              int err_temp = c.set_temperature(t);
-              ErrorHandling::openmc_cell_set_temperature(err_temp);
+              c.set_temperature(t);
             }
           }
         }
@@ -125,15 +124,9 @@ MultiAppMooseOkapiTransfer::execute()
       {
         if (_multi_app->hasLocalApp(I))
         {
-
+          // TODO:  How to give heat to Bison?
           // Create array to store volumetric heat deposition in each material
-          xt::xtensor<double, 1> heat = xt::empty<double>({n_materials_});
-
-          // Get heat source normalized by user-specified power
-          heat = openmc_driver_->heat_source(power_);
-
-          // TODO:  Give this to Bison?
-
+          // xt::xtensor<double, 1> heat = xt::empty<double>({_n_materials});
         }
         else
         {
@@ -190,9 +183,12 @@ MultiAppMooseOkapiTransfer::runChecks()
                "the requested tally");
   {
     int32_t id;
-    err_get = openmc_cell_get_id(i + 1, &id);
-    ErrorHandling::openmc_cell_get_id(err_get, "MultiAppMooseOkapiTransfer");
-    index_to_id[i + 1] = id;
+    for (int32_t i = 0; i <= _n_materials; ++i)
+    {
+      err_get = openmc_cell_get_id(i + 1, &id);
+      ErrorHandling::openmc_cell_get_id(err_get, "MultiAppMooseOkapiTransfer");
+      _index_to_id[i + 1] = id;
+    }
   }
 
   // Important variables

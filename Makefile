@@ -107,7 +107,10 @@ ADDITIONAL_DEPEND_LIBS += $(OPENMC_LIB)
 ################################## GET FLAGS RIGHT ####################################
 
 ADDITIONAL_LIBS	    += -Wl,-rpath,$(OPENMC_BUILD_DIR)/lib -L$(OPENMC_BUILD_DIR)/lib -lopenmc
-ADDITIONAL_INCLUDES += -I$(OPENMC_DIR)/include
+ADDITIONAL_INCLUDES += -I$(OPENMC_DIR)/include \
+                       -I$(OPENMC_DIR)/vendor/pugixml \
+                       -I$(OPENMC_DIR)/vendor/xtensor/include \
+                       -I$(OPENMC_DIR)/vendor/xtl/include
 ifneq ($(and $(ENABLE_BUFFALO_COUPLING),$(BUFFALO_DIR)),)
 ADDITIONAL_CPPFLAGS += -DENABLE_BUFFALO_COUPLING
 endif

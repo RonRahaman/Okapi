@@ -1,6 +1,5 @@
 #include "MultiAppMooseOkapiReactivityTransfer.h"
 #include "OpenMCErrorHandling.h"
-#include "openmc.h"
 
 #include "MooseTypes.h"
 #include "MooseVariableScalar.h"
@@ -11,6 +10,8 @@
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
+
+#include "openmc/capi.h"
 
 template <>
 InputParameters
